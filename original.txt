@@ -1,0 +1,283 @@
+versão antiga HTML
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script src="https://cdn.jsdelivr.net/gh/wansleynery/SankhyaJX@main/jx.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Personalizado (AD_TPREVOP)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; 
+        }
+        table {
+            width: 100%;
+            min-width: 1200px; 
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dfe6e9;
+            padding: 10px 12px; 
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap; 
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9em; 
+        }
+        td input[type="text"],
+        td input[type="number"] {
+            width: calc(100% - 16px); 
+            padding: 8px;
+            border: 1px solid #b2bec3;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+            font-size: 0.95em;
+        }
+        td input[type="text"]:focus,
+        td input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            padding: 10px 18px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-right: 8px;
+        }
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        button.adicionar {
+            background-color: #2ecc71; 
+        }
+        button.adicionar:hover {
+            background-color: #27ae60;
+        }
+        button.remover-ultima {
+            background-color: #f39c12;
+        }
+        button.remover-ultima:hover {
+            background-color: #e67e22;
+        }
+        button#btnSalvarDadosSankhya {
+            background-color: #3498db; 
+        }
+        button#btnSalvarDadosSankhya:hover {
+            background-color: #2980b9;
+        }
+        button.remover { 
+            background-color: #e74c3c; 
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+        button.remover:hover {
+            background-color: #c0392b;
+        }
+        .acoes {
+            text-align: center;
+            min-width: 80px; 
+        }
+        .form-actions {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Lançamento de Previsão de OP (AD_TPREVOP)</h1>
+
+    <form id="formSankhyaCustom" onsubmit="return false;">
+        <table id="tabelaSankhyaCustom">
+            <thead>
+                <tr>
+                    <th>Nro. Produção</th>
+                    <th>Produto (Cód.)</th>
+                    <th>Unidade</th>
+                    <th>Qtd. a Produzir</th>
+                    <th>Lote do Produto</th>
+                    <th>Nro. OP (IDIPROC)</th>
+                    <th>Média Venda 3M</th>
+                    <th>Média Últ. Semana</th>
+                    <th>Saldo Estoque</th>
+                    <th>Sugestão Calculada</th>
+                    <th class="acoes">Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="number" name="NPROD" placeholder="Nro. Prod."></td>
+                    <td><input type="number" name="CODPROD" placeholder="Cód. Prod."></td>
+                    <td><input type="text" name="CODVOL" placeholder="Unidade"></td>
+                    <td><input type="number" step="any" name="QTD" placeholder="Quantidade"></td>
+                    <td><input type="text" name="LOTE" placeholder="Lote"></td>
+                    <td><input type="number" name="IDIPROC" placeholder="Nro. OP"></td>
+                    <td><input type="number" step="any" name="MEDVDA3M" placeholder="Média"></td>
+                    <td><input type="number" step="any" name="ULTMED" placeholder="Média"></td>
+                    <td><input type="number" step="any" name="ESTOQUE" placeholder="Estoque"></td>
+                    <td><input type="number" step="any" name="SUGESTAO" placeholder="Sugestão"></td>
+                    <td class="acoes"><button type="button" class="remover" onclick="removerLinhaIndividual(this)">Remover</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="form-actions">
+            <button type="button" class="adicionar" onclick="adicionarLinha()">Adicionar Linha</button>
+            <button type="button" class="remover-ultima" onclick="removerUltimaLinha()">Remover Última Linha</button>
+            <button type="button" id="btnSalvarDadosSankhya">Salvar Dados</button> 
+        </div>
+    </form>
+
+    <script>
+        function adicionarLinha() {
+            const tabelaBody = document.getElementById('tabelaSankhyaCustom').getElementsByTagName('tbody')[0];
+            const novaLinha = tabelaBody.insertRow();
+            novaLinha.innerHTML = `
+                <td><input type="number" name="NPROD" placeholder="Nro. Prod."></td>
+                <td><input type="number" name="CODPROD" placeholder="Cód. Prod."></td>
+                <td><input type="text" name="CODVOL" placeholder="Unidade"></td>
+                <td><input type="number" step="any" name="QTD" placeholder="Quantidade"></td>
+                <td><input type="text" name="LOTE" placeholder="Lote"></td>
+                <td><input type="number" name="IDIPROC" placeholder="Nro. OP"></td>
+                <td><input type="number" step="any" name="MEDVDA3M" placeholder="Média"></td>
+                <td><input type="number" step="any" name="ULTMED" placeholder="Média"></td>
+                <td><input type="number" step="any" name="ESTOQUE" placeholder="Estoque"></td>
+                <td><input type="number" step="any" name="SUGESTAO" placeholder="Sugestão"></td>
+                <td class="acoes"><button type="button" class="remover" onclick="removerLinhaIndividual(this)">Remover</button></td>
+            `;
+        }
+
+        function removerLinhaIndividual(botao) {
+            const linha = botao.closest('tr');
+            linha.parentNode.removeChild(linha);
+        }
+
+        function removerUltimaLinha() {
+            const tabelaBody = document.getElementById('tabelaSankhyaCustom').getElementsByTagName('tbody')[0];
+            if (tabelaBody.rows.length > 0) {
+                tabelaBody.removeChild(tabelaBody.lastElementChild);
+            }
+        }
+
+        document.getElementById('btnSalvarDadosSankhya').addEventListener('click', function() {
+            salvarDadosComJX();
+        });
+
+        function coletarDadosDeUmaLinha(linhaHtml) {
+            const registro = {};
+            const inputs = linhaHtml.querySelectorAll('input[name]');
+
+            inputs.forEach(input => {
+                const nomeCampo = input.getAttribute('name');
+                let valorCampo = input.value;
+
+                if (input.type === 'number') {
+                    valorCampo = valorCampo ? parseFloat(valorCampo) : null;
+                }
+                if (valorCampo !== null || input.type === 'text') {
+                     registro[nomeCampo.toUpperCase()] = valorCampo; 
+                }
+            });
+            return registro;
+        }
+
+        async function salvarDadosComJX() {
+            const tabelaBody = document.getElementById('tabelaSankhyaCustom').getElementsByTagName('tbody')[0];
+            const linhasHtml = tabelaBody.rows;
+            const totalLinhas = linhasHtml.length;
+
+            if (totalLinhas === 0) {
+                alert("Não há dados para salvar. Adicione pelo menos uma linha preenchida.");
+                return;
+            }
+
+            let sucessos = 0;
+            let erros = 0;
+            let mensagensErro = [];
+
+            const btnSalvar = document.getElementById('btnSalvarDadosSankhya');
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = 'Salvando...';
+
+            for (let i = 0; i < totalLinhas; i++) {
+                const dadosLinha = coletarDadosDeUmaLinha(linhasHtml[i]);
+
+                if (Object.keys(dadosLinha).length === 0) {
+                    if (i === totalLinhas - 1 && sucessos === 0 && erros === 0 && totalLinhas === 1) {
+                        // Caso especial: única linha e está vazia, não contar como processada para o alert final.
+                    } else {
+                        // Se houver outras linhas ou alguma já processada, considera-se processada (vazia)
+                    }
+                    continue; 
+                }
+                
+                console.log(`Enviando para JX.salvar (Linha ${i + 1}):`, JSON.stringify(dadosLinha));
+
+                try {
+                    const resultado = await JX.salvar(dadosLinha, 'AD_TPREVOP');
+                    console.log(`Sucesso ao salvar linha ${i + 1}:`, resultado);
+                    sucessos++;
+                } catch (erro) {
+                    console.error(`Erro ao salvar linha ${i + 1}:`, erro);
+                    erros++;
+                    let msg = (erro && erro.message) ? erro.message : "Erro desconhecido";
+                    if (erro && erro.serviceResponse && erro.serviceResponse.responseBody && erro.serviceResponse.responseBody.errorMessage) {
+                        msg = erro.serviceResponse.responseBody.errorMessage;
+                    }
+                    mensagensErro.push(`Linha ${i + 1}: ${msg}`);
+                }
+            }
+
+            btnSalvar.disabled = false;
+            btnSalvar.textContent = 'Salvar Dados';
+
+            let feedbackFinal = `Processamento concluído.\n${sucessos} linha(s) salva(s) com sucesso.`;
+            if (erros > 0) {
+                feedbackFinal += `\n${erros} linha(s) com erro.\nDetalhes dos erros:\n${mensagensErro.join('\n')}`;
+                alert(feedbackFinal);
+            } else if (sucessos > 0) {
+                alert(feedbackFinal);
+            } else if (totalLinhas > 0 && sucessos === 0 && erros === 0) {
+                alert("Nenhuma linha continha dados para salvar ou todas as linhas estavam vazias.");
+            }
+            
+            if (erros === 0 && sucessos > 0) {
+                 // Limpa a tabela somente se tudo ocorreu bem e algo foi salvo
+                 // tabelaBody.innerHTML = '';
+                 // adicionarLinha(); 
+            }
+        }
+    </script>
+
+</body>
+</html>
