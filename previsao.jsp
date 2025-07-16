@@ -107,13 +107,16 @@
                     columns: columns,
                     layout: "fitData",
                     height: "450px",
-                    placeholder: "Nenhum produto encontrado com os critérios da consulta."
+                    placeholder: "Nenhum produto encontrado."
                 });
 
                 function saveAllData() {
-                    const dataToSave = table.getData();
-                    if (dataToSave.length === 0) { alert("Nenhuma previsão para salvar."); return; }
-                    
+                    const dadosDaTabela = table.getData();
+                    if (dadosDaTabela.length === 0) {
+                        alert("Nenhuma previsão para salvar.");
+                        return;
+                    }
+
                     const btn = document.getElementById('btnSalvarDadosSankhya');
                     btn.disabled = true;
                     btn.textContent = 'Salvando...';
@@ -122,9 +125,27 @@
                     let errorCount = 0;
                     let errorMessages = [];
 
-                    for (const record of dataToSave) {
+                    // Função auxiliar recursiva que processa uma linha de cada vez.
+                    function processarLinha(index) {
+                        if (index >= dadosDaTabela.length) {
+                            btn.disabled = false;
+                            btn.textContent = 'Salvar Todas as Previsões';
+
+                            let finalMessage = `Processamento concluído!\n${successCount} previsão(ões) salva(s) com sucesso.`;
+                            if (errorCount > 0) {
+                                finalMessage += `\n\n${errorCount} previsão(ões) com erro:\n` + errorMessages.join('\n');
+                            }
+                            alert(finalMessage);
+
+                            if (errorCount === 0 && successCount > 0) {
+                                window.location.reload();
+                            }
+                            return; // Encerra a execução.
+                        }
+
+                        const record = dadosDaTabela[index];
                         const recordToSave = {
-                            NPROD: 10,
+                           NPROD: 10,
                             CODPROD: Number(record.CODPROD),
                             QTDVDASEMANAANT: record.TOTAL,       
                             SUGSEG: record.SEG_FEIRA,
@@ -134,29 +155,24 @@
                             SUGSEX: record.SEX_FEIRA
                         
                         };
-                        
-                        try {
-                            JX.salvar(recordToSave, 'AD_PREVPROD');
-                            successCount++;
-                        } catch (error) {
-                            errorCount++;
-                            let msg = (error && error.message) ? error.message : "Erro desconhecido";
-                            errorMessages.push(`Produto ${record.CODPROD}: ${msg}`);
-                        }
+
+                        JX.salvar(recordToSave, 'AD_PREVPROD')
+                            .then(function(resultado) {
+                                successCount++;
+                                processarLinha(index + 1);
+                            })
+                            .catch(function(error) {
+                                errorCount++;
+                                let msg = (error && error.message) ? error.message : "Erro desconhecido";
+                                if (error && error.serviceResponse && error.serviceResponse.responseBody && error.serviceResponse.responseBody.errorMessage) {
+                                    msg = error.serviceResponse.responseBody.errorMessage;
+                                }
+                                errorMessages.push(`Produto ${record.CODPROD}: ${msg}`);
+                                processarLinha(index + 1);
+                            });
                     }
 
-                    btn.disabled = false;
-                    btn.textContent = 'Salvar Todas as Previsões';
-
-                    let finalMessage = `Processamento concluído!\n${successCount} previsão(ões) salva(s) com sucesso.`;
-                    if (errorCount > 0) {
-                        finalMessage += `\n\n${errorCount} previsão(ões) com erro:\n` + errorMessages.join('\n');
-                    }
-                    alert(finalMessage);
-
-                    if (errorCount === 0 && successCount > 0) {
-                        window.location.reload();
-                    }
+                    processarLinha(0);
                 }
 
                 $('#btnSalvarDadosSankhya').on('click', saveAllData);
